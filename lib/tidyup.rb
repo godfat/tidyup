@@ -38,10 +38,15 @@ module Tidyup
   end
 
   def self.double_width? char
-    return false unless char.respond_to?(:codepoints)
     return false if char.nil? || char && char.empty?
-    code = char.codepoints.to_a.first
+    code = char.unpack('U').first
     code > 0xA0 && !(code > 0x452 && code < 0x1100)
+  rescue ArgumentError => e
+    if e.message.start_with?('malformed')
+      false
+    else
+      raise
+    end
   end
 
   def self.terminal_width
