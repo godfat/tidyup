@@ -6,8 +6,11 @@ module Tidyup
   end
 
   def self.scan_words str
-    # //u is only needed for ruby 1.8, no-op in 1.9
-    str.scan(/\w+|[^\s\w]/u).sort
+    if ''.respond_to?(:force_encoding)
+      str.scan(/\w+|[^\s\w]/).sort
+    else
+      str.scan(/\w+|[^\s\w]/u).sort
+    end
   end
 
   def self.break_lines words
