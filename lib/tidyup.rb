@@ -37,6 +37,7 @@ module Tidyup
   end
 
   def self.double_width? char
+    return false unless char.respond_to?(:codepoints)
     return false if char.nil? || char && char.empty?
     code = char.codepoints.to_a.first
     code > 0xA0 && !(code > 0x452 && code < 0x1100)
