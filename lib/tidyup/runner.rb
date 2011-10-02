@@ -4,8 +4,8 @@ module Tidyup::Runner
   module_function
   def options
     @options ||=
-    [['-h, --help'       , 'Print this message'                      ],
-     ['-v, --version'    , 'Print the version'                       ]]
+    [['-h, --help'       , 'Print this message'],
+     ['-v, --version'    , 'Print the version' ]]
   end
 
   def run argv=ARGV

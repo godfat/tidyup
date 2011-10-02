@@ -8,7 +8,7 @@ desc 'Generate gemspec'
 task 'gem:spec' do
   Gemgem.spec = Gemgem.create do |s|
     require 'tidyup/version'
-    s.name    = 'rib'
+    s.name    = 'tidyup'
     s.version = Tidyup::VERSION
 
     %w[].each{ |g| s.add_runtime_dependency(g) }
