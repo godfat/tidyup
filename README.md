@@ -82,6 +82,10 @@ Shows you:
 
 [...]
 
+Try `lolcat --help | tidyup | lolcat -a` if you have [lolcat][] installed.
+
+[lolcat]: https://github.com/busyloop/lolcat
+
 ## LICENSE:
 
     Apache License 2.0
