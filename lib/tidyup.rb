@@ -51,7 +51,7 @@ module Tidyup
 
   def self.terminal_width
     @width ||= case    w = `stty size 2> /dev/null`.split[1].to_i
-               when 0; w = case `tput cols 2> /dev/null`.to_i
+               when 0; w = case w = `tput cols 2> /dev/null`.to_i
                            when 0; 80
                            else  ; w
                            end
