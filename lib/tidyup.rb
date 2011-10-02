@@ -5,7 +5,7 @@ module Tidyup
     if color
       Tidyup.break_lines_color(Tidyup.scan_words_color(str))
     else
-      Tidyup.break_lines(Tidyup.scan_words(str))
+      Tidyup.break_lines(      Tidyup.scan_words(      str))
     end
   end
 
