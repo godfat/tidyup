@@ -5,21 +5,30 @@ module Tidyup
     Tidyup.break_lines(Tidyup.scan_words(str))
   end
 
+  def self.ansi
+    @ansi ||= '(\e\[\d+(;\d+){0,2}m)'
+  end
+
   def self.scan_words str
     if ''.respond_to?(:force_encoding)
-      str.scan(/\w+|[^\b\s\w]/).sort
+      str.scan(/#{ansi}?(\w+)|#{ansi}?([^\e\b\s\w])?/).
+        inject([['', nil]]){ |r, i|
+          word, color = [i[2] || i[5], i[0] || i[3]]
+          r << [word, color || r.last.last] if word
+          r
+        }[1..-1].sort_by(&:join)
     else
-      str.scan(/\w+|[^\b\s\w]/u).sort
+      str.scan(/\w+|[^\e\b\s\w]/u).sort
     end
   end
 
   def self.break_lines words
-    words.inject(['']){ |r, i|
-      if word_size(r.last) + word_size(i) < terminal_width
-        if double_width?(i)
-          r.last << i
+    words.inject(['']){ |r, (word, color)|
+      if word_size(r.last) + word_size(word) < terminal_width
+        if double_width?(word)
+          r.last << "#{color}#{word}"
         else
-          r.last << "#{i} "
+          r.last << "#{color}#{word} "
         end
       else
         r.last << "\n"
@@ -31,7 +40,7 @@ module Tidyup
 
   def self.word_size word
     return 0 if word.empty?
-    word.chars.map{ |char|
+    word.gsub(/#{ansi}/, '').chars.map{ |char|
       if double_width?(char)
         2
       else
