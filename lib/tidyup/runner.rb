@@ -4,11 +4,14 @@ module Tidyup::Runner
   module_function
   def options
     @options ||=
-    [['-h, --help'       , 'Print this message'],
-     ['-v, --version'    , 'Print the version' ]]
+    [['-c, --color'   , 'Color-aware (default)'],
+     ['-n, --no-color', 'Ignore colors'        ],
+     ['-h, --help'    , 'Print this message'   ],
+     ['-v, --version' , 'Print the version'    ]]
   end
 
   def run argv=ARGV
+    @color = true
     paths = parse(argv)
     require 'tidyup'
     input = if paths.empty?
@@ -16,13 +19,19 @@ module Tidyup::Runner
             else
               paths.map{ |path| File.read(path) }.join(' ')
             end
-    puts Tidyup.tidyup(input)
+    puts Tidyup.tidyup(input, @color)
   end
 
   def parse argv
     paths = []
     until argv.empty?
       case arg = argv.shift
+      when /^-c/, /^--color/
+        @color = true
+
+      when /^-n/, /^--no-color/
+        @color = false
+
       when /^-h/, '--help'
         puts(help)
         exit

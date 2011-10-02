@@ -1,13 +1,41 @@
 
 module Tidyup
   module_function
-  def tidyup str
-    Tidyup.break_lines(Tidyup.scan_words(str))
+  def tidyup str, color=true
+    if color
+      Tidyup.break_lines_color(Tidyup.scan_words_color(str))
+    else
+      Tidyup.break_lines(Tidyup.scan_words(str))
+    end
   end
 
   ANSI = '(\e\[\d+(;\d+){0,2}m)'
 
   def self.scan_words str
+    if ''.respond_to?(:force_encoding)
+      str.scan(/\w+|[^\e\b\s\w]/).sort
+    else
+      str.scan(/\w+|[^\e\b\s\w]/u).sort
+    end
+  end
+
+  def self.break_lines words
+    words.inject(['']){ |r, i|
+      if word_size(r.last) + word_size(i) < terminal_width
+        if double_width?(i)
+          r.last << i
+        else
+          r.last << "#{i} "
+        end
+      else
+        r.last << "\n"
+        r << ''
+      end
+      r
+    }.join
+  end
+
+  def self.scan_words_color str
     regexp = if ''.respond_to?(:force_encoding)
                /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/
              else
@@ -21,7 +49,7 @@ module Tidyup
     }[1..-1].sort_by(&:join)
   end
 
-  def self.break_lines words
+  def self.break_lines_color words
     words.inject(['']){ |r, (word, color)|
       if word_size(r.last) + word_size(word) < terminal_width
         if double_width?(word)
