@@ -7,9 +7,9 @@ module Tidyup
 
   def self.scan_words str
     if ''.respond_to?(:force_encoding)
-      str.scan(/\w+|[^\s\w]/).sort
+      str.scan(/\w+|[^\b\s\w]/).sort
     else
-      str.scan(/\w+|[^\s\w]/u).sort
+      str.scan(/\w+|[^\b\s\w]/u).sort
     end
   end
 
