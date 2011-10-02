@@ -16,7 +16,15 @@ module Tidyup::Runner
             else
               paths.map{ |path| File.read(path) }.join(' ')
             end
-    puts Tidyup.tidyup(input).scan(/.{#{width-1}}/).join("\n")
+    puts Tidyup.tidyup(input).inject(['']){ |r, i|
+      if r.last.size + i.size < width
+        r.last << "#{i} "
+      else
+        r.last << "\n"
+        r << ''
+      end
+      r
+    }.join
   end
 
   def width
