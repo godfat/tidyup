@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'tidyup'
+require 'tidyup/runner'
 
-puts Tidyup.tidyup(File.read(ARGV.first))
+puts Tidyup::Runner.run(ARGV)
