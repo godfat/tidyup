@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Lin Jen-Shin (godfat)"]
-  s.date = "2011-10-02"
+  s.date = "2011-10-03"
   s.description = "! ( ) Tidy document s up your\n\nInspired by [The Art of Clean Up: Sorting and Stacking Everyday Objects][img]\n\n[img]: http://www.jeanniejeannie.com/2011/08/29/the-art-of-clean-up-sorting-and-stacking-everyday-objects/"
   s.email = ["godfat (XD) godfat.org"]
   s.executables = ["tidyup"]

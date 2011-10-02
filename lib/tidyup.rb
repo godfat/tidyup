@@ -8,16 +8,17 @@ module Tidyup
   ANSI = '(\e\[\d+(;\d+){0,2}m)'
 
   def self.scan_words str
-    if ''.respond_to?(:force_encoding)
-      str.scan(/#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/).
-        inject([['', nil]]){ |r, i|
-          word, color = [i[2] || i[5], i[0] || i[3]]
-          r << [word, color || r.last.last] if word
-          r
-        }[1..-1].sort_by(&:join)
-    else
-      str.scan(/\w+|[^\e\b\s\w]/u).sort
-    end
+    regexp = if ''.respond_to?(:force_encoding)
+               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/
+             else
+               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/u
+             end
+
+    str.scan(regexp).inject([['', nil]]){ |r, i|
+      word, color = [i[2] || i[5], i[0] || i[3]]
+      r << [word, color || r.last.last] if word
+      r
+    }[1..-1].sort_by(&:join)
   end
 
   def self.break_lines words
