@@ -5,7 +5,7 @@ module Tidyup
     if color
       Tidyup.break_lines_color(Tidyup.scan_words_color(str))
     else
-      Tidyup.break_lines(      Tidyup.scan_words(      str))
+      Tidyup.break_lines_color(      Tidyup.scan_words(      str))
     end
   end
 
@@ -13,7 +13,13 @@ module Tidyup
 
   def self.scan_words str
     if ''.respond_to?(:force_encoding)
-      str.scan(/\w+|[^\e\b\s\w]/).sort
+      str.scan(/[#{ANSI}\w]+|[#{ANSI}[^\e\b\s\w]]/).inject([['', nil]]){ |r,i|
+        word, color = [i, i[/#{ANSI}$/, 1] || (r.reverse.find{ |(_,c)| c }||[]).last]
+        r << [word, color] if word && !word.gsub(/#{ANSI}/, '').strip.empty?
+        r
+      }.sort_by{ |v|
+        color = v.first[/^#{ANSI}/] || v.last || ''
+        v.first.gsub(/#{ANSI}/, '') + color }
     else
       str.scan(/\w+|[^\e\b\s\w]/u).sort
     end
@@ -73,11 +79,12 @@ module Tidyup
       else
         1
       end
-    }.inject(&:+)
+    }.inject(&:+) || 0
   end
 
   def self.double_width? char
-    return false if char.nil? || char && char.empty?
+    char = char.gsub(/#{ANSI}/, '')
+    return false if char.empty?
     code = char.unpack('U').first
     code > 0xA0 && !(code > 0x452 && code < 0x1100)
   rescue ArgumentError => e
