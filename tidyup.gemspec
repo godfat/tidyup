@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Lin Jen-Shin (godfat)"]
   s.date = "2011-10-02"
-  s.description = "\n\nInspired by [The Art of Clean Up: Sorting and Stacking Everyday Objects][img]\n\n[img]: http://www.jeanniejeannie.com/2011/08/29/the-art-of-clean-up-sorting-and-stacking-everyday-objects/"
+  s.description = "! ( ) Tidy document s up your\n\nInspired by [The Art of Clean Up: Sorting and Stacking Everyday Objects][img]\n\n[img]: http://www.jeanniejeannie.com/2011/08/29/the-art-of-clean-up-sorting-and-stacking-everyday-objects/"
   s.email = ["godfat (XD) godfat.org"]
   s.executables = ["tidyup"]
   s.files = [
@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/godfat/tidyup"
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.10"
-  s.summary = ""
+  s.summary = "! ( ) Tidy document s up your"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
