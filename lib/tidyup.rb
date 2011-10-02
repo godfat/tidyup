@@ -19,7 +19,7 @@ module Tidyup
         r
       }.sort_by{ |v|
         color = v.first[/^#{ANSI}/] || v.last || ''
-        v.first.gsub(/#{ANSI}/, '') + color }
+        color.scan(/\d+/).map(&:to_i) }
     else
       str.scan(/\w+|[^\e\b\s\w]/u).sort
     end
@@ -52,7 +52,7 @@ module Tidyup
       word, color = [i[2] || i[5], i[0] || i[3]]
       r << [word, color || r.last.last] if word
       r
-    }[1..-1].sort_by(&:join)
+    }[1..-1].sort_by{ |i| i.last.scan(/\d+/).map(&:to_i) }
   end
 
   def self.break_lines_color words
