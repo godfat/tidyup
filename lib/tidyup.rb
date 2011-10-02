@@ -6,7 +6,8 @@ module Tidyup
   end
 
   def self.scan_words str
-    str.scan(/\w+|[^\s\w]/).sort
+    # //u is only needed for ruby 1.8, no-op in 1.9
+    str.scan(/\w+|[^\s\w]/u).sort
   end
 
   def self.break_lines words
