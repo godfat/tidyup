@@ -5,13 +5,11 @@ module Tidyup
     Tidyup.break_lines(Tidyup.scan_words(str))
   end
 
-  def self.ansi
-    @ansi ||= '(\e\[\d+(;\d+){0,2}m)'
-  end
+  ANSI = '(\e\[\d+(;\d+){0,2}m)'
 
   def self.scan_words str
     if ''.respond_to?(:force_encoding)
-      str.scan(/#{ansi}?(\w+)|#{ansi}?([^\e\b\s\w])?/).
+      str.scan(/#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/).
         inject([['', nil]]){ |r, i|
           word, color = [i[2] || i[5], i[0] || i[3]]
           r << [word, color || r.last.last] if word
@@ -40,7 +38,7 @@ module Tidyup
 
   def self.word_size word
     return 0 if word.empty?
-    word.gsub(/#{ansi}/, '').chars.map{ |char|
+    word.gsub(/#{ANSI}/, '').chars.map{ |char|
       if double_width?(char)
         2
       else
