@@ -16,25 +16,7 @@ module Tidyup::Runner
             else
               paths.map{ |path| File.read(path) }.join(' ')
             end
-    puts Tidyup.tidyup(input).inject(['']){ |r, i|
-      if r.last.size + i.size < width
-        r.last << "#{i} "
-      else
-        r.last << "\n"
-        r << ''
-      end
-      r
-    }.join
-  end
-
-  def width
-    @width ||= case    w = `stty size 2> /dev/null`.split[1].to_i
-               when 0; w = case `tput cols 2> /dev/null`.to_i
-                           when 0; 80
-                           else  ; w
-                           end
-               else  ; w
-               end
+    puts Tidyup.tidyup(input)
   end
 
   def parse argv
