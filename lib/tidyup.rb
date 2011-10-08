@@ -3,9 +3,9 @@ module Tidyup
   module_function
   def tidyup str, color=true
     if color
-      Tidyup.break_lines_color(Tidyup.scan_words_color(str))
+      Tidyup.break_lines(Tidyup.scan_words_color(str))
     else
-      Tidyup.break_lines_color(      Tidyup.scan_words(      str))
+      Tidyup.break_lines(      Tidyup.scan_words(      str))
     end
   end
 
@@ -13,16 +13,33 @@ module Tidyup
 
   def self.scan_words str
     if ''.respond_to?(:force_encoding)
-      str.scan(/[#{ANSI}\w]+|[#{ANSI}[^\e\b\s\w]]/).inject([['', nil]]){ |r,i|
+      str.scan(/[#{ANSI}\w]+|[^\e\b\s\w]/).inject([]){ |r,i|
         word, color = [i, i[/#{ANSI}$/, 1] || (r.reverse.find{ |(_,c)| c }||[]).last]
-        r << [word, color] if word && !word.gsub(/#{ANSI}/, '').strip.empty?
+        r << "#{color}#{word}" if word && !word.gsub(/#{ANSI}/, '').strip.empty?
         r
       }.sort_by{ |v|
-        color = v.first[/^#{ANSI}/] || v.last || ''
-        color.scan(/\d+/).map(&:to_i) }
+        color = v[/^#{ANSI}/] || ''
+        color.scan(/\d+/).map(&:to_i)
+
+        word = v.gsub(/#{ANSI}/, '')
+      }.map{ |a| a.scan() }
     else
       str.scan(/\w+|[^\e\b\s\w]/u).sort
     end
+  end
+
+  def self.scan_words_color str
+    regexp = if ''.respond_to?(:force_encoding)
+               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/
+             else
+               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/u
+             end
+
+    str.scan(regexp).inject([['', nil]]){ |r, i|
+      word, color = [i[2] || i[5], i[0] || i[3]]
+      r << [word, color || r.last.last] if word
+      r
+    }[1..-1].sort_by{ |i| i.last.scan(/\d+/).map(&:to_i) }
   end
 
   def self.break_lines words
@@ -41,45 +58,16 @@ module Tidyup
     }.join
   end
 
-  def self.scan_words_color str
-    regexp = if ''.respond_to?(:force_encoding)
-               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/
-             else
-               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/u
-             end
-
-    str.scan(regexp).inject([['', nil]]){ |r, i|
-      word, color = [i[2] || i[5], i[0] || i[3]]
-      r << [word, color || r.last.last] if word
-      r
-    }[1..-1].sort_by{ |i| i.last.scan(/\d+/).map(&:to_i) }
-  end
-
-  def self.break_lines_color words
-    words.inject(['']){ |r, (word, color)|
-      if word_size(r.last) + word_size(word) < terminal_width
-        if double_width?(word)
-          r.last << "#{color}#{word}"
-        else
-          r.last << "#{color}#{word} "
-        end
-      else
-        r.last << "\n"
-        r << ''
-      end
-      r
-    }.join
-  end
-
   def self.word_size word
+    word = word.gsub(/#{ANSI}/, '')
     return 0 if word.empty?
-    word.gsub(/#{ANSI}/, '').chars.map{ |char|
+    word.chars.map{ |char|
       if double_width?(char)
         2
       else
         1
       end
-    }.inject(&:+) || 0
+    }.inject(&:+)
   end
 
   def self.double_width? char

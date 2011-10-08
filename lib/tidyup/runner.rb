@@ -4,10 +4,11 @@ module Tidyup::Runner
   module_function
   def options
     @options ||=
-    [['-c, --color'   , 'Color-aware (default)'],
-     ['-n, --no-color', 'Ignore colors'        ],
-     ['-h, --help'    , 'Print this message'   ],
-     ['-v, --version' , 'Print the version'    ]]
+    [['-0, --mode 0' , 'Sort by colors (default)'     ],
+     ['-1, --mode 1' , 'Sort by colors (broken words)'],
+     ['-2, --mode 2' , 'Sort by words'                ],
+     ['-h, --help'   , 'Print this message'           ],
+     ['-v, --version', 'Print the version'            ]]
   end
 
   def run argv=ARGV
