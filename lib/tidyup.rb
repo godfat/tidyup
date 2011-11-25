@@ -26,16 +26,14 @@ module Tidyup
 
         r
       }.sort_by{ |(word, color)|
-        text       = text(word)
-        first_char = text[0]
-        color = word[0..word.index(first_char)][/#{ANSI}$/, 1] || color if
-          first_char
+        text  = text(word)
+        char  = text[0]
+        color = word[0..word.index(char)][/#{ANSI}$/, 1] || color if char
         seq   = color.scan(/\d+/).map(&:to_i).last
-        rgb   = seq2rgb(seq)
         if mode <= 1
-          [rgb, text]
+          [seq, text]
         else
-          [text, rgb]
+          [text, seq]
         end
       }.map{ |(word, color)| "#{color}#{word}" }
     else
@@ -86,30 +84,6 @@ module Tidyup
 
   def self.text word
     word.gsub(/#{ANSI}/, '')
-  end
-
-  def self.seq2rgb seq
-    if seq < 16
-      0
-    elsif seq >= 232
-      0
-    else
-      red = rgb_table[seq - 16][0]
-      red = 1 if red == 0
-      Math.asin((red - 128) / 127.0)
-    end
-  end
-
-  def self.rgb_table
-    @rgb_table ||= begin
-      a = [0, 95, 135, 175, 215, 255]
-      # list comprehension
-      # [(x, y, z) | x <- a, y <- a, z <- a]
-      r = []
-      a.each{ |i| a.each{ |ii| a.each{ |iii|
-        r << [i, ii, iii] }}}
-      r
-    end
   end
 
   def self.terminal_width
