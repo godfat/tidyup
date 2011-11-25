@@ -1,45 +1,46 @@
 
 module Tidyup
   module_function
-  def tidyup str, color=true
-    if color
-      Tidyup.break_lines(Tidyup.scan_words_color(str))
-    else
-      Tidyup.break_lines(      Tidyup.scan_words(      str))
-    end
+  def tidyup str, mode=0
+    Tidyup.break_lines(Tidyup.scan_words(str, mode))
   end
 
   ANSI = '(\e\[\d+(;\d+){0,2}m)'
 
-  def self.scan_words str
+  def self.scan_words str, mode=0
     if ''.respond_to?(:force_encoding)
-      str.scan(/[#{ANSI}\w]+|[^\e\b\s\w]/).inject([]){ |r,i|
-        word, color = [i, i[/#{ANSI}$/, 1] || (r.reverse.find{ |(_,c)| c }||[]).last]
-        r << "#{color}#{word}" if word && !word.gsub(/#{ANSI}/, '').strip.empty?
-        r
-      }.sort_by{ |v|
-        color = v[/^#{ANSI}/] || ''
-        color.scan(/\d+/).map(&:to_i)
+      last_color = ''
+      str.scan(/[#{ANSI}\w]+|[^\e\b\s\w]/).inject([]){ |r, word|
+        text       = text(word).strip
+        color      = word[/#{ANSI}$/, 1] || last_color
+        last_color = color
 
-        word = v.gsub(/#{ANSI}/, '')
-      }.map{ |a| a.scan() }
+        next r if text.empty?
+
+        if mode % 2 == 1 # broken words
+          # TODO: bugs! some words are missing
+          r.push(*word.scan(/(#{ANSI}\w)/).map{ |w| [w.first, color] })
+        else
+          r << [word, color]
+        end
+
+        r
+      }.sort_by{ |(word, color)|
+        text       = text(word)
+        first_char = text[0]
+        color = word[0..word.index(first_char)][/#{ANSI}$/, 1] || color if
+          first_char
+        seq   = color.scan(/\d+/).map(&:to_i).last
+        rgb   = seq2rgb(seq)
+        if mode <= 1
+          [rgb, text]
+        else
+          [text, rgb]
+        end
+      }.map{ |(word, color)| "#{color}#{word}" }
     else
       str.scan(/\w+|[^\e\b\s\w]/u).sort
     end
-  end
-
-  def self.scan_words_color str
-    regexp = if ''.respond_to?(:force_encoding)
-               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/
-             else
-               /#{ANSI}?(\w+)|#{ANSI}?([^\e\b\s\w])?/u
-             end
-
-    str.scan(regexp).inject([['', nil]]){ |r, i|
-      word, color = [i[2] || i[5], i[0] || i[3]]
-      r << [word, color || r.last.last] if word
-      r
-    }[1..-1].sort_by{ |i| i.last.scan(/\d+/).map(&:to_i) }
   end
 
   def self.break_lines words
@@ -59,7 +60,7 @@ module Tidyup
   end
 
   def self.word_size word
-    word = word.gsub(/#{ANSI}/, '')
+    word = text(word)
     return 0 if word.empty?
     word.chars.map{ |char|
       if double_width?(char)
@@ -71,7 +72,7 @@ module Tidyup
   end
 
   def self.double_width? char
-    char = char.gsub(/#{ANSI}/, '')
+    char = text(char)
     return false if char.empty?
     code = char.unpack('U').first
     code > 0xA0 && !(code > 0x452 && code < 0x1100)
@@ -80,6 +81,34 @@ module Tidyup
       false
     else
       raise
+    end
+  end
+
+  def self.text word
+    word.gsub(/#{ANSI}/, '')
+  end
+
+  def self.seq2rgb seq
+    if seq < 16
+      0
+    elsif seq >= 232
+      0
+    else
+      red = rgb_table[seq - 16][0]
+      red = 1 if red == 0
+      Math.asin((red - 128) / 127.0)
+    end
+  end
+
+  def self.rgb_table
+    @rgb_table ||= begin
+      a = [0, 95, 135, 175, 215, 255]
+      # list comprehension
+      # [(x, y, z) | x <- a, y <- a, z <- a]
+      r = []
+      a.each{ |i| a.each{ |ii| a.each{ |iii|
+        r << [i, ii, iii] }}}
+      r
     end
   end
 
